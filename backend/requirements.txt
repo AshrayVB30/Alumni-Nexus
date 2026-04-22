@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+motor
+sentence-transformers
+faiss-cpu
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt<4.0.0
+python-multipart
+pydantic
+pydantic-settings
+uuid
+pydantic[email]
