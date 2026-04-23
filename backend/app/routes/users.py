@@ -44,6 +44,20 @@ async def update_profile(user_id: str, data: UserUpdate):
         
     return {"message": "Profile updated successfully"}
 
+@router.get("/", summary="Get all users")
+async def get_all_users(role: str = None):
+    db = get_database()
+    users_collection = db["users"]
+    query = {}
+    if role:
+        query["role"] = role
+    
+    cursor = users_collection.find(query, {"password": 0})
+    users = []
+    async for user in cursor:
+        users.append(user)
+    return users
+
 @router.get("/{user_id}/mentors", summary="Get top 5 mentor recommendations")
 async def get_mentors(user_id: str):
     matches = await match_users(user_id, top_k=5)

@@ -1,165 +1,215 @@
-# Alumni Nexus: Project Documentation
+# Alumni Nexus: Comprehensive Project Documentation
 
-Alumni Nexus is an AI-powered digital ecosystem designed to foster engagement, mentorship, and career development within alumni networks. This platform bridges the gap between current students and alumni through intelligent matching, real-time communication, and collaborative marketplaces.
+Alumni Nexus is a state-of-the-art, AI-powered digital ecosystem designed to bridge the gap between alumni and students. It facilitates mentorship, skill-based collaboration, and real-time networking through a unified platform accessible via Web and Mobile.
 
 ---
 
-## 1. Project Overview
+## 1. Project Vision & Objectives
 
 ### Vision
-To create a seamless, AI-driven platform where students can find guidance from experienced alumni, collaborate on projects, and participate in a vibrant professional community.
+To empower educational communities by leveraging AI to create meaningful connections, enabling knowledge transfer, and accelerating career growth through a seamless digital experience.
 
 ### Key Objectives
-- **AI Mentorship**: Automate the process of finding the right mentor using vector similarity.
-- **Skill Marketplace**: Facilitate project-based collaboration between alumni and students.
-- **Real-time Networking**: Provide instant communication channels via WebSockets.
-- **Community Building**: Host discussions and knowledge sharing through a dedicated forum.
+*   **Intelligent Mentorship**: Automated mentor matching using vector similarity search (FAISS).
+*   **Skill Marketplace**: A platform for alumni to post projects and students to apply, fostering practical learning.
+*   **Real-time Communication**: Integrated WebSocket-based chat for instant guidance.
+*   **Knowledge Hub**: A community forum for long-form discussions and institutional updates.
+*   **Cross-Platform Access**: Native-feel experience on both web (Next.js) and mobile (React Native/Expo).
 
 ---
 
-## 2. Technology Stack
+## 2. System Architecture
 
-### Backend
-- **Framework**: FastAPI (Python 3.10+)
-- **Database**: MongoDB (NoSQL) with Motor (Async driver)
-- **AI Engine**: FAISS (Facebook AI Similarity Search) for vector matching
-- **Embeddings**: Sentence-Transformers (`all-MiniLM-L6-v2`)
-- **Authentication**: JWT (JSON Web Tokens) with Passlib (bcrypt)
-- **Real-time**: WebSockets for instant messaging
+The project follows a modern decoupled architecture:
 
-### Frontend
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Shadcn UI / Radix UI
-- **Icons**: Lucide React
-- **State/Fetching**: React Hooks & Fetch API
-
----
-
-## 3. Architecture & System Design
-
-### High-Level Flow
 ```mermaid
 graph TD
-    User((User)) -->|Browser| Frontend[Next.js Frontend]
-    Frontend -->|REST API / WS| Backend[FastAPI Backend]
-    Backend -->|Async Queries| MongoDB[(MongoDB)]
-    Backend -->|Vector Search| FAISS[FAISS Vector Index]
-    FAISS -.->|Pre-computed| Embeddings[Sentence Transformer]
+    subgraph "Clients"
+        Web[Next.js Web App]
+        Mobile[Expo React Native App]
+    end
+
+    subgraph "Backend Tier"
+        API[FastAPI Server]
+        WS[WebSocket Manager]
+    end
+
+    subgraph "Data & AI Layer"
+        DB[(MongoDB Atlas)]
+        FAISS[FAISS Vector Index]
+        Model[all-MiniLM-L6-v2]
+    end
+
+    Web <-->|REST / WS| API
+    Mobile <-->|REST / WS| API
+    API <-->|Motor Async| DB
+    API <-->|In-Memory| FAISS
+    FAISS <-->|Embeddings| Model
 ```
 
-### AI Mentor Matching Logic
-1.  **Data Sync**: On startup, the backend fetches all "Alumni" profiles from MongoDB.
-2.  **Embedding Generation**: For each mentor, a "document string" is created (combining job title, company, skills, and bio). This string is converted into a 384-dimension vector.
-3.  **Indexing**: These vectors are stored in a FAISS `IndexFlatL2` in-memory index.
-4.  **Querying**: When a student requests a match, their interests and skills are converted into a vector. FAISS performs a similarity search to find the top $K$ nearest alumni vectors.
+---
+
+## 3. Technology Stack
+
+### Backend (The "Brain")
+*   **Runtime**: Python 3.10+
+*   **Web Framework**: FastAPI (Asynchronous, High Performance)
+*   **Database**: MongoDB (NoSQL) with **Motor** for async operations.
+*   **AI/ML**: 
+    *   **FAISS**: Facebook AI Similarity Search for high-speed vector indexing.
+    *   **Sentence-Transformers**: `all-MiniLM-L6-v2` for generating semantic embeddings.
+*   **Authentication**: JWT (JSON Web Tokens) with `Passlib` (bcrypt) for secure password hashing.
+*   **Real-time**: Python WebSockets for live chat functionality.
+
+### Web Frontend
+*   **Framework**: Next.js 14 (App Router)
+*   **Language**: TypeScript (Strict typing)
+*   **Styling**: Tailwind CSS with Framer Motion for animations.
+*   **UI Components**: Shadcn UI (Radix-based) for a premium look and feel.
+*   **Icons**: Lucide React.
+*   **State Management**: React Context API & Hooks.
+
+### Mobile App
+*   **Framework**: React Native with **Expo**.
+*   **Navigation**: React Navigation (Stack & Tab).
+*   **Icons**: Expo Vector Icons.
+*   **API Client**: Axios with interceptors for auth management.
 
 ---
 
 ## 4. Database Schema (MongoDB)
 
 ### `users` Collection
-Stores all user information and detailed profiles.
-- `_id`: UUID string
-- `email`: Unique string
-- `password`: Hashed string
-- `role`: "Student", "Alumni", or "Admin"
-- `profile`: Nested object containing:
-    - `skills`: List of strings
-    - `interests`: List of strings
-    - `academic_info`: (Students only) College, branch, year, CGPA
-    - `professional_info`: (Alumni only) Company, title, industry
-    - `mentorship_prefs`: (Alumni only) Availability, domains
+The core collection storing identity and rich profile data.
+```json
+{
+  "_id": "uuid-string",
+  "name": "Full Name",
+  "email": "user@example.com",
+  "password": "hashed_password",
+  "role": "Student | Alumni | Admin",
+  "profile": {
+    "bio": "Text description",
+    "skills": ["Python", "Design"],
+    "interests": ["AI", "Fintech"],
+    "academic_info": { "college": "...", "branch": "...", "cgpa": 8.5 },
+    "professional_info": { "company": "...", "title": "...", "experience": 5 },
+    "mentorship_prefs": { "is_available": true, "domains": ["Web Dev"] }
+  }
+}
+```
+
+### `projects` Collection (Marketplace)
+```json
+{
+  "_id": "uuid-string",
+  "title": "Project Title",
+  "description": "Project details",
+  "posted_by": "alumni_id",
+  "skills_required": ["React", "Node"],
+  "status": "Open | Closed",
+  "applicants": ["student_id_1", "student_id_2"]
+}
+```
 
 ### `messages` Collection
-Stores chat history.
-- `sender_id`: Reference to User ID
-- `receiver_id`: Reference to User ID
-- `message`: Text content
-- `timestamp`: UTC datetime
-
-### `projects` Collection (Skill Marketplace)
-- `title`: String
-- `description`: String
-- `posted_by`: User ID
-- `skills_required`: List of strings
-- `applicants`: List of User IDs
-
-### `posts` Collection (Forum)
-- `content`: String
-- `author`: Name/ID
-- `likes`: List of User IDs
-- `comments`: Nested list of comment objects
+Optimized for retrieval of conversation history.
+```json
+{
+  "sender_id": "uuid",
+  "receiver_id": "uuid",
+  "message": "Hello!",
+  "timestamp": "ISO-8601 String",
+  "is_read": false
+}
+```
 
 ---
 
-## 5. API Documentation
+## 5. AI Matching Engine: Deep Dive
 
-### Authentication (`/api/auth`)
-- `POST /register`: Creates a new account with role-specific profile structures.
-- `POST /login`: Returns a JWT access token and user metadata.
+The "AI Match" feature uses a **Vector Space Model** to find the most relevant mentors for a student.
 
-### Users & Profiles (`/api/users`)
-- `GET /me`: Returns the current user's profile.
-- `PUT /{user_id}/profile`: Updates profile data.
-- `GET /{user_id}/mentors`: **AI Endpoint** - Returns top 5 matched mentors using FAISS.
-
-### Chat (`/api/chat`)
-- `WS /ws/{token}`: WebSocket endpoint for real-time messaging.
-- `GET /conversations`: Lists all active chat counterparts.
-- `GET /history/{other_id}`: Retrieves chat history between two users.
-
-### Marketplace & Forum
-- `GET /api/projects`: Lists available projects.
-- `POST /api/projects/{id}/apply`: Apply for a project.
-- `GET /api/posts`: Lists forum discussions.
+1.  **Preprocessing**: On startup, all Alumni profiles are flattened into "Document Strings" containing their title, company, skills, and industry.
+2.  **Vectorization**: The `all-MiniLM-L6-v2` model converts these strings into 384-dimensional floating-point vectors.
+3.  **Indexing**: These vectors are loaded into a FAISS `IndexFlatL2`.
+4.  **Querying**: When a student requests a match, their interests and skills are vectorized and compared against the index using Euclidean distance (L2).
+5.  **Efficiency**: This allows the platform to search through thousands of alumni in milliseconds.
 
 ---
 
-## 6. Setup & Installation
+## 6. API Reference
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- MongoDB Atlas account (or local instance)
+### Auth Module (`/api/auth`)
+*   `POST /register`: Onboard new users.
+*   `POST /login`: Generate JWT tokens.
 
-### Backend Setup
-1.  Navigate to `backend/`.
-2.  Install dependencies: `pip install -r requirements.txt`.
-3.  Configure `.env`:
-    ```env
-    URI=mongodb+srv://... (Your MongoDB URI)
-    SECRET_KEY=... (For JWT)
-    ```
-4.  Run server: `uvicorn app.main:app --reload`.
+### User Module (`/api/users`)
+*   `GET /me`: Fetch authenticated user profile.
+*   `PUT /{id}/profile`: Update profile information.
+*   `GET /{id}/mentors`: **AI matching endpoint**.
 
-### Frontend Setup
-1.  Navigate to `frontend/`.
-2.  Install dependencies: `npm install`.
-3.  Run development server: `npm run dev`.
-4.  Open `http://localhost:3000`.
+### Marketplace Module (`/api/projects`)
+*   `GET /`: Fetch all projects.
+*   `POST /`: Create a new project (Alumni only).
+*   `POST /{id}/apply`: Apply for a project (Student only).
+
+### Communication Module (`/api/chat`)
+*   `WS /ws/{token}`: Real-time messaging entry point.
+*   `GET /conversations`: List active chat threads.
+*   `GET /history/{user_id}`: Retrieve message logs.
 
 ---
 
-## 7. Deployment
+## 7. Setup & Installation
 
-### Dockerization
-The project includes `Dockerfile`s for both backend and frontend.
-- **Backend**: Uses `python:3.10-slim` for a lightweight API container.
-- **Frontend**: Optimized for production builds in a Node environment.
+### 1. Environment Configuration
+Create a `.env` file in the root:
+```env
+MONGODB_URI=your_mongodb_uri_here
+SECRET_KEY=your_super_secret_jwt_key
+ALGORITHM=HS256
+```
 
-### Production Recommendations
-- **Database**: Use MongoDB Atlas for managed scaling.
-- **Hosting**:
-    - Backend: AWS ECS, Google Cloud Run, or Render.
-    - Frontend: Vercel or Netlify (ideal for Next.js).
-- **Security**: Ensure `allow_origins` in CORS is restricted to your production domain.
+### 2. Backend Setup
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python run.py
+```
+
+### 3. Web Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 4. Mobile Setup
+```bash
+cd mobile
+npm install
+npx expo start
+```
 
 ---
 
-## 8. Future Roadmap
-- **Video Mentorship**: Integration with Zoom or WebRTC.
-- **AI Resume Reviewer**: Automated feedback for student resumes.
-- **Event Management**: Alumni-led webinars and meetups.
-- **Mobile App**: Cross-platform mobile experience using React Native.
+## 8. Development Roadmap
+
+- [x] Phase 1: Core Authentication & Profile Management.
+- [x] Phase 2: AI Mentor Matching with FAISS.
+- [x] Phase 3: Real-time Chat & WebSockets.
+- [x] Phase 4: Skill Marketplace & Project Application.
+- [x] Phase 5: Mobile App development with Expo.
+- [ ] Phase 6: Video conferencing integration (WebRTC).
+- [ ] Phase 7: Automated Resume Reviewer (LLM Integration).
+- [ ] Phase 8: Global Notification System (Push/Email).
+
+---
+
+## 9. Maintainer Notes
+*   **Vector Sync**: The FAISS index is updated on server startup. In a scaling environment, this should be moved to a background task or a dedicated vector database.
+*   **Security**: Always ensure the `SECRET_KEY` is kept confidential and changed in production environments.
+
