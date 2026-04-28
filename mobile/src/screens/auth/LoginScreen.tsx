@@ -22,25 +22,30 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { Ionicons } from '@expo/vector-icons';
 
 export const LoginScreen = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // Can be email or USN
   const [password, setPassword] = useState('');
+  const [loginType, setLoginType] = useState<'email' | 'usn'>('email');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!identifier || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     setLoading(true);
     try {
-      const data = await authService.login(email, password);
+      const loginData = loginType === 'email' 
+        ? { email: identifier, password } 
+        : { usn: identifier, password };
+        
+      const data = await authService.login(loginData.email || '', loginData.password, loginData.usn);
       setAuth(
         {
           id: data.user_id,
-          email: email,
+          email: loginType === 'email' ? identifier : '',
           role: data.role,
           name: data.name,
         },
@@ -68,14 +73,30 @@ export const LoginScreen = () => {
           <Text style={styles.subtitle}>Sign in to continue to Alumni Nexus</Text>
         </View>
 
+        <View style={styles.loginTypeContainer}>
+          <TouchableOpacity 
+            style={[styles.loginTypeBtn, loginType === 'email' && styles.loginTypeBtnActive]}
+            onPress={() => setLoginType('email')}
+          >
+            <Text style={[styles.loginTypeBtnText, loginType === 'email' && styles.loginTypeBtnTextActive]}>Email</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.loginTypeBtn, loginType === 'usn' && styles.loginTypeBtnActive]}
+            onPress={() => setLoginType('usn')}
+          >
+            <Text style={[styles.loginTypeBtnText, loginType === 'usn' && styles.loginTypeBtnTextActive]}>USN</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.form}>
           <AppInput
-            label="Email Address"
-            placeholder="example@college.edu"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            icon="mail-outline"
+            label={loginType === 'email' ? "Email Address" : "University Seat Number (USN)"}
+            placeholder={loginType === 'email' ? "example@college.edu" : "1AB22CS001"}
+            value={identifier}
+            onChangeText={setIdentifier}
+            keyboardType={loginType === 'email' ? "email-address" : "default"}
+            autoCapitalize={loginType === 'email' ? "none" : "characters"}
+            icon={loginType === 'email' ? "mail-outline" : "card-outline"}
           />
           <AppInput
             label="Password"
@@ -132,11 +153,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 5,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 10px 20px rgba(0, 0, 0, 0.05)',
+      },
+      default: {
+        shadowColor: Colors.black,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.05,
+        shadowRadius: 20,
+        elevation: 5,
+      }
+    }),
   },
   title: {
     ...Typography.display,
@@ -148,6 +176,33 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  loginTypeContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    padding: 4,
+    borderRadius: 12,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  loginTypeBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginTypeBtnActive: {
+    backgroundColor: Colors.primary,
+  },
+  loginTypeBtnText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+  },
+  loginTypeBtnTextActive: {
+    color: Colors.white,
   },
   form: {
     width: '100%',

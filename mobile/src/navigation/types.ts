@@ -7,13 +7,14 @@ export type AuthStackParamList = {
 export type AppTabParamList = {
   HomeTab: undefined;
   DirectoryTab: undefined;
+  ForumTab: undefined;
   ChatTab: undefined;
-  JobsTab: undefined;
+  MarketplaceTab: undefined;
   ProfileTab: undefined;
 };
 
-export type JobsStackParamList = {
-  Jobs: undefined;
+export type MarketplaceStackParamList = {
+  Marketplace: undefined;
   CreateProject: undefined;
 };
 
@@ -22,6 +23,8 @@ export type HomeStackParamList = {
   MentorList: undefined;
   MentorDetail: { mentorId: string };
   Notifications: undefined;
+  Forum: undefined;
+  CreatePost: undefined;
 };
 
 export type DirectoryStackParamList = {
@@ -37,4 +40,5 @@ export type ChatStackParamList = {
 export type ProfileStackParamList = {
   Profile: undefined;
   EditProfile: undefined;
+  AdminDashboard: undefined;
 };

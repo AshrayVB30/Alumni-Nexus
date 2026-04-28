@@ -321,10 +321,15 @@ export default function PostProject() {
     try {
       await api.post('/projects/', {
         title:           form.title,
+        tagline:         form.tagline,
         description:     form.description,
         skills_required: form.skills_required,
         stipend:         form.stipend,
         duration:        form.duration,
+        effort_level:    form.effort,
+        location_type:   form.location,
+        students_needed: parseInt(form.slots) || 1,
+        deadline:        form.deadline,
       });
       toast('Project published successfully.', 'success');
       router.push('/marketplace');

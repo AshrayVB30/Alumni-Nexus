@@ -24,19 +24,30 @@ export const RegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [usn, setUsn] = useState('');
+  const [yearOfPassing, setYearOfPassing] = useState('');
+  const [department, setDepartment] = useState('');
   const [role, setRole] = useState<'Student' | 'Alumni'>('Student');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (!name || !email || !password || !usn || !yearOfPassing) {
+      Alert.alert('Error', 'Please fill in all required fields (Name, Email, Password, USN, Year of Passing)');
       return;
     }
 
     setLoading(true);
     try {
-      await authService.register({ name, email, password, role });
+      await authService.register({ 
+        name, 
+        email, 
+        password, 
+        role, 
+        usn, 
+        year_of_passing: yearOfPassing, 
+        department 
+      });
       Alert.alert(
         'Success', 
         'Account created successfully! Please sign in.',
@@ -111,6 +122,29 @@ export const RegisterScreen = () => {
             onChangeText={setEmail}
             keyboardType="email-address"
             icon="mail-outline"
+          />
+          <AppInput
+            label="USN (Required)"
+            placeholder="1AB22CS001"
+            value={usn}
+            onChangeText={setUsn}
+            autoCapitalize="characters"
+            icon="card-outline"
+          />
+          <AppInput
+            label="Year of Passing (Required)"
+            placeholder="2026"
+            value={yearOfPassing}
+            onChangeText={setYearOfPassing}
+            keyboardType="numeric"
+            icon="calendar-outline"
+          />
+          <AppInput
+            label="Department"
+            placeholder="Computer Science"
+            value={department}
+            onChangeText={setDepartment}
+            icon="business-outline"
           />
           <AppInput
             label="Password"

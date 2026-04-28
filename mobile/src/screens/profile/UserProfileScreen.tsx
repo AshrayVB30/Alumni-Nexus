@@ -16,9 +16,11 @@ import { Avatar } from '../../components/Avatar';
 import { Badge } from '../../components/Badge';
 import { AppButton } from '../../components/AppButton';
 import { Ionicons } from '@expo/vector-icons';
-import { userService } from '../../services/userService';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { DirectoryStackParamList } from '../../navigation/types';
+import { useAuthStore } from '../../store/useAuthStore';
+import { userService } from '../../services/userService';
+import api from '../../services/api';
 
 type UserProfileRouteProp = RouteProp<DirectoryStackParamList, 'UserProfile'>;
 
@@ -29,12 +31,15 @@ export const UserProfileScreen = () => {
   
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const currentUser = useAuthStore((s) => s.user);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const data = await userService.getUser(userId);
         setUserData(data);
+        setIsFollowing(data.profile?.followers?.includes(currentUser?.id) || false);
       } catch (err) {
         console.error(err);
       } finally {
@@ -42,7 +47,7 @@ export const UserProfileScreen = () => {
       }
     };
     fetchUser();
-  }, [userId]);
+  }, [userId, currentUser?.id]);
 
   const handleMessage = () => {
     if (!userData) return;
@@ -53,6 +58,20 @@ export const UserProfileScreen = () => {
         otherName: userData.name 
       }
     });
+  };
+
+  const handleFollow = async () => {
+    try {
+      const endpoint = isFollowing ? 'unfollow' : 'follow';
+      await api.post(`/social/${userId}/${endpoint}`);
+      setIsFollowing(!isFollowing);
+      // Refresh user data to get updated counts
+      const data = await userService.getUser(userId);
+      setUserData(data);
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || "Action failed";
+      alert(msg);
+    }
   };
 
   if (loading) {
@@ -89,6 +108,18 @@ export const UserProfileScreen = () => {
           <Avatar name={userData.name} size={100} style={styles.avatar} />
           <Text style={styles.name}>{userData.name}</Text>
           <Badge label={userData.role} variant={isAlumni ? 'primary' : 'gray'} style={styles.roleBadge} />
+          
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{profile.followers_count || 0}</Text>
+              <Text style={styles.statLabel}>Followers</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{profile.following_count || 0}</Text>
+              <Text style={styles.statLabel}>Following</Text>
+            </View>
+          </View>
+
           <Text style={styles.bio}>{profile.bio || 'No bio provided'}</Text>
           
           <View style={styles.socialRow}>
@@ -106,11 +137,21 @@ export const UserProfileScreen = () => {
         </View>
 
         <View style={styles.actionRow}>
+          {isAlumni && currentUser?.role === 'Student' && (
+            <AppButton 
+              title={isFollowing ? "Unfollow" : "Follow"} 
+              onPress={handleFollow} 
+              variant={isFollowing ? "outline" : "primary"}
+              style={styles.followBtn}
+              icon={isFollowing ? "person-remove-outline" : "person-add-outline"}
+            />
+          )}
           <AppButton 
             title="Message" 
             onPress={handleMessage} 
             icon="chatbubble-outline"
             style={styles.messageBtn}
+            variant="outline"
           />
         </View>
 
@@ -217,10 +258,34 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   actionRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
     marginBottom: Spacing.xl,
   },
+  followBtn: {
+    flex: 1,
+    height: 48,
+  },
   messageBtn: {
-    height: 50,
+    flex: 1,
+    height: 48,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    ...Typography.bodyBold,
+    fontSize: 18,
+    color: Colors.text,
+  },
+  statLabel: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
   },
   section: {
     marginBottom: Spacing.xl,

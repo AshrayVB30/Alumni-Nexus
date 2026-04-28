@@ -39,7 +39,7 @@ async def sync_users_to_faiss():
     id_map = {}
     current_faiss_id = 0
     
-    cursor = users_collection.find({"role": "Alumni"})
+    cursor = users_collection.find({"role": {"$regex": "^alumni$", "$options": "i"}})
     async for user in cursor:
         profile = user.get("profile", {})
         skills = profile.get("skills", [])

@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
@@ -54,6 +55,13 @@ export const ProfileScreen = () => {
   };
 
   const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      if (confirm('Are you sure you want to sign out?')) {
+        logout();
+      }
+      return;
+    }
+
     Alert.alert(
       'Logout',
       'Are you sure you want to sign out?',
@@ -88,6 +96,21 @@ export const ProfileScreen = () => {
           <Text style={styles.email}>{profile?.email}</Text>
           <View style={styles.roleContainer}>
             <Badge label={profile?.role} variant={profile?.role === 'Alumni' ? 'primary' : 'gray'} />
+          </View>
+          
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{profile?.profile?.followers_count || 0}</Text>
+              <Text style={styles.statLabel}>Followers</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{profile?.profile?.following_count || 0}</Text>
+              <Text style={styles.statLabel}>Following</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{profile?.profile?.connections_count || 0}</Text>
+              <Text style={styles.statLabel}>Connects</Text>
+            </View>
           </View>
           
           <View style={styles.actionRow}>
@@ -190,6 +213,26 @@ export const ProfileScreen = () => {
           </View>
         </Card>
 
+        {/* Management (Admin only) */}
+        {profile?.role === 'Alumni' && (
+          <Card style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>Management</Text>
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('AdminDashboard')}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: '#eef2ff' }]}>
+                <Ionicons name="settings-outline" size={20} color={Colors.primary} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Admin Panel</Text>
+                <Text style={styles.menuSubtitle}>Manage users and platform content</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+          </Card>
+        )}
+
         {/* Account Actions */}
         <View style={styles.footer}>
           <AppButton 
@@ -231,10 +274,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     borderWidth: 4,
     borderColor: Colors.white,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+    } : {
+      shadowColor: Colors.black,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+    }),
   },
   name: {
     ...Typography.display,
@@ -247,7 +294,24 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   roleContainer: {
+    marginBottom: Spacing.md,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: Spacing.xl,
     marginBottom: Spacing.lg,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    ...Typography.bodyBold,
+    fontSize: 18,
+    color: Colors.text,
+  },
+  statLabel: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
   },
   actionRow: {
     width: '100%',
@@ -327,5 +391,30 @@ const styles = StyleSheet.create({
   versionText: {
     ...Typography.small,
     color: Colors.textMuted,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+  },
+  menuIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  menuContent: {
+    flex: 1,
+  },
+  menuTitle: {
+    ...Typography.bodyBold,
+    fontSize: 14,
+    color: Colors.text,
+  },
+  menuSubtitle: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
   },
 });

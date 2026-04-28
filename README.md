@@ -5,32 +5,32 @@ Alumni Nexus is an **AI-powered digital ecosystem** designed to bridge the gap b
 ---
 
 ## 🚀 Key Features
+
 - **Intelligent Mentorship**: Automated mentor matching using vector similarity search (FAISS).
 - **Skill Marketplace**: A platform for alumni to post projects and students to apply.
+- **Premium Admin Dashboard**: A high-fidelity SaaS-style portal for analytics and user management.
 - **Real-time Chat**: Integrated WebSocket-based messaging for instant guidance.
 - **Cross-Platform**: Seamless experience across Web (Next.js) and Mobile (React Native/Expo).
+- **Community Forum**: Discussion threads for knowledge sharing and networking.
+
+---
 
 ## 📂 Project Structure
+
 - `backend/`: FastAPI application with MongoDB Atlas and FAISS AI Integration.
-- `frontend/`: Next.js 14 App Router application with Tailwind CSS & Shadcn UI.
+- `frontend/`: Next.js 14 App Router application with Tailwind CSS & Framer Motion.
 - `mobile/`: Expo-based React Native application for Android and iOS.
 
 ---
 
 ## 🛠️ Detailed Documentation
+
 For a deep dive into the architecture, database schema, AI logic, and API reference, please refer to the:
 👉 **[Full Project Documentation](Project_Documentation.md)**
 
 ---
 
 ## 1. Setup Instructions
-
-### Environment Configuration
-The database URI is pre-configured in the root `.env` for quick start, but you should create your own for production:
-```env
-URI=your_mongodb_uri_here
-SECRET_KEY=your_secret_key_here
-```
 
 ### Backend Setup
 1. `cd backend`
@@ -57,28 +57,21 @@ SECRET_KEY=your_secret_key_here
 
 ---
 
+## 🎨 Design System
+The project follows a **Premium SaaS Aesthetic**:
+- **Palette**: Indigo & Slate primary theme.
+- **UI Components**: White glassy cards, soft shadows, and 24px rounded corners.
+- **Animations**: Fluid micro-interactions powered by Framer Motion.
+- **Charts**: Real-time data visualization using Recharts.
+
+---
+
 ## 📊 Database Design
 The project uses **MongoDB** with the following core collections:
 - `users`: Identity, roles, and rich profiles.
 - `messages`: WebSocket chat history logs.
 - `projects`: Marketplace postings and applications.
 - `posts`: Discussion forum threads and comments.
-
----
-
-## 🧪 Sample API Requests
-
-### Register a User
-```bash
-curl -X 'POST' 'http://localhost:8000/api/auth/register' \
-  -H 'Content-Type: application/json' \
-  -d '{"email": "student@example.com", "role": "Student", "password": "securepassword123"}'
-```
-
-### Mentorship AI Match
-```bash
-curl -X 'GET' 'http://localhost:8000/api/users/{user_id}/mentors'
-```
 
 ---
 

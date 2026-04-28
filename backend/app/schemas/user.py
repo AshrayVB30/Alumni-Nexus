@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, List, Dict, Any
+from datetime import datetime
 
 class SocialLinks(BaseModel):
     linkedin: Optional[str] = None
@@ -57,7 +58,17 @@ class AlumniProfessional(BaseModel):
 
 class ProfileBase(BaseModel):
     # Common
+    profile_photo: Optional[str] = None
     bio: Optional[str] = None
+    current_company: Optional[str] = None
+    designation: Optional[str] = None
+    location: Optional[str] = None
+    followers_count: int = 0
+    following_count: int = 0
+    connections_count: int = 0
+    followers: List[str] = []
+    following: List[str] = []
+    
     skills: List[str] = []
     interests: List[str] = []
     career_interests: List[str] = []
@@ -77,14 +88,22 @@ class ProfileBase(BaseModel):
 class UserBase(BaseModel):
     email: EmailStr
     name: Optional[str] = None
-    role: str = Field(default="Student", description="Role can be Student, Alumni, or Admin")
+    usn: str = Field(..., description="University Seat Number (required and unique)")
+    year_of_passing: str = Field(..., description="Year of passing/graduation")
+    phone_number: Optional[str] = None
+    department: Optional[str] = None
+    role: str = Field(default="student", description="Role can be student, alumni, or admin")
+    is_verified: bool = False
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class UserCreate(UserBase):
     name: str
     password: str
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: Optional[EmailStr] = None
+    usn: Optional[str] = None
     password: str
 
 class UserInDB(UserBase):
@@ -97,4 +116,7 @@ class UserInDB(UserBase):
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
+    phone_number: Optional[str] = None
+    department: Optional[str] = None
+    year_of_passing: Optional[str] = None
     profile: Optional[ProfileBase] = None

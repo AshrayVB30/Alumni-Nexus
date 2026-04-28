@@ -129,12 +129,16 @@ export const HomeScreen = () => {
               icon={s.icon}
               iconColor={s.color}
               iconBg={s.bg}
+              onPress={s.label === 'Forum' ? () => navigation.navigate('ForumTab' as any) : undefined}
             />
           ))}
         </View>
 
         {/* AI Banner */}
-        <TouchableOpacity style={styles.banner}>
+        <TouchableOpacity 
+          style={styles.banner}
+          onPress={() => navigation.navigate('MentorMatching' as any)}
+        >
           <View style={styles.bannerContent}>
             <View style={styles.bannerTag}>
               <Ionicons name="sparkles" size={12} color="#a5b4fc" />
@@ -185,17 +189,17 @@ export const HomeScreen = () => {
             </View>
             <Text style={styles.actionText}>Directory</Text>
           </Card>
-          <Card style={styles.actionCard} variant="outlined" onPress={() => navigation.navigate('ChatTab')}>
-            <View style={[styles.actionIcon, { backgroundColor: '#f5f3ff' }]}>
-              <Ionicons name="chatbubbles" size={24} color="#7c3aed" />
+          <Card style={styles.actionCard} variant="outlined" onPress={() => navigation.navigate('ForumTab')}>
+            <View style={[styles.actionIcon, { backgroundColor: '#fffbeb' }]}>
+              <Ionicons name="chatbubbles" size={24} color="#d97706" />
             </View>
-            <Text style={styles.actionText}>Messages</Text>
+            <Text style={styles.actionText}>Forum</Text>
           </Card>
-          <Card style={styles.actionCard} variant="outlined" onPress={() => navigation.navigate('JobsTab')}>
+          <Card style={styles.actionCard} variant="outlined" onPress={() => navigation.navigate('MarketplaceTab')}>
             <View style={[styles.actionIcon, { backgroundColor: '#ecfdf5' }]}>
               <Ionicons name="briefcase" size={24} color="#059669" />
             </View>
-            <Text style={styles.actionText}>Jobs</Text>
+            <Text style={styles.actionText}>Marketplace</Text>
           </Card>
         </View>
 

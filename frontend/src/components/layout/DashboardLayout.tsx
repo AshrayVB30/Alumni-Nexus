@@ -11,13 +11,15 @@ import { cn } from '@/lib/utils';
 
 const SIDEBAR_W = 260;
 
-const navItems = [
+const allNavItems = [
   { name: 'Dashboard',       icon: LayoutDashboard, href: '/dashboard'   },
-  { name: 'Mentor Matching', icon: Users,            href: '/mentors'     },
+  { name: 'Mentor Matching', icon: Users,           href: '/mentors'     },
   { name: 'Messages',        icon: MessageCircle,   href: '/chat'        },
   { name: 'Forum',           icon: Hash,            href: '/forum'       },
   { name: 'Marketplace',     icon: Briefcase,       href: '/marketplace' },
   { name: 'Profile',         icon: UserIcon,        href: '/profile'     },
+  { name: 'Admin Analytics',  icon: LayoutDashboard, href: '/admin',       adminOnly: true },
+  { name: 'User Management', icon: Users,           href: '/admin/users', adminOnly: true },
 ];
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
@@ -55,7 +57,13 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 10px', marginBottom: 8 }}>
           Navigation
         </p>
-        {navItems.map((item) => {
+        {allNavItems.filter(item => {
+          const isAdmin = user?.role?.toLowerCase() === 'admin';
+          if (isAdmin) {
+            return ['Profile', 'Admin Analytics', 'User Management'].includes(item.name);
+          }
+          return !item.adminOnly;
+        }).map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/');
           return (
             <Link
@@ -126,7 +134,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
   const user     = useAuthStore((s) => s.user);
-  const current  = navItems.find((i) => pathname === i.href || pathname.startsWith(i.href + '/'));
+  const current  = allNavItems.find((i) => pathname === i.href || pathname.startsWith(i.href + '/'));
 
   return (
     <header style={{ height: 64, background: '#fff', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', flexShrink: 0, position: 'sticky', top: 0, zIndex: 20 }}>

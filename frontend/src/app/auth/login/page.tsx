@@ -105,9 +105,22 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', { email, password });
       setAuth({ id: res.data.user_id, role: res.data.role, email, name: res.data.name }, res.data.access_token);
-      router.push('/dashboard');
+      
+      if (res.data.role.toLowerCase() === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid email or password.');
+      let errorMessage = 'Invalid email or password.';
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') {
+          errorMessage = err.response.data.detail;
+        } else if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail[0]?.msg || errorMessage;
+        }
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

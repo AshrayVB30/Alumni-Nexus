@@ -20,10 +20,15 @@ async def create_project(
     new_proj = {
         "_id": proj_id,
         "title": project.title,
+        "tagline": project.tagline,
         "description": project.description,
         "skills_required": project.skills_required,
         "stipend": project.stipend,
         "duration": project.duration,
+        "effort_level": project.effort_level,
+        "location_type": project.location_type,
+        "students_needed": project.students_needed,
+        "deadline": project.deadline,
         "posted_by": user["user_id"],
         "applicants": [],
         "created_at": datetime.utcnow()

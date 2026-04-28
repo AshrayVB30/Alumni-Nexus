@@ -217,6 +217,8 @@ export default function PublicProfile() {
   const [data,    setData]    = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saved,   setSaved]   = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     if (!params.id) return;
@@ -224,7 +226,29 @@ export default function PublicProfile() {
       .then((r) => setData(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [params.id]);
+
+    // Check if following
+    if (viewer && params.id !== viewer.id) {
+      api.get(`/social/${params.id}/is_following`)
+        .then(r => setFollowing(r.data.is_following))
+        .catch(console.error);
+    }
+  }, [params.id, viewer]);
+
+  const handleFollow = async () => {
+    if (!viewer) { router.push('/auth/login'); return; }
+    setFollowLoading(true);
+    try {
+      const endpoint = following ? 'unfollow' : 'follow';
+      await api.post(`/social/${params.id}/${endpoint}`);
+      setFollowing(!following);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.detail || 'Failed to update follow status');
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -380,6 +404,22 @@ export default function PublicProfile() {
                   <Star style={{ width: 15, height: 15, fill: saved ? C.amber : 'none', color: saved ? C.amber : C.muted }} />
                   {saved ? 'Shortlisted' : 'Shortlist'}
                 </button>
+                {viewer && viewer.id !== data._id && (
+                  <button
+                    onClick={handleFollow}
+                    disabled={followLoading}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 11, cursor: 'pointer', fontSize: 13, fontWeight: 700, transition: 'all 150ms',
+                      border: `1px solid ${following ? C.indigo : C.border}`,
+                      background: following ? C.indigoBg : C.white,
+                      color: following ? C.indigo : C.muted,
+                      opacity: followLoading ? 0.7 : 1
+                    }}
+                  >
+                    <UserPlus style={{ width: 15, height: 15 }} />
+                    {following ? 'Following' : 'Follow'}
+                  </button>
+                )}
                 {viewer?.role === 'Alumni' && (
                   <ActionBtn
                     label="Invite to Project"

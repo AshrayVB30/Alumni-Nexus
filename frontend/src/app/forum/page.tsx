@@ -511,7 +511,7 @@ export default function Forum() {
   const handleComment = async (id: string, text: string) => {
     if (!user) return;
     try {
-      await api.post(`/posts/${id}/comment`, { content: text, author: user.id });
+      await api.post(`/posts/${id}/comments`, { content: text, author: user.id });
       toast('Comment added.', 'success');
       fetchPosts();
     } catch {

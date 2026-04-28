@@ -1,14 +1,26 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { useAuthStore } from '../store/useAuthStore';
 
-// Default to Android emulator address, can be overridden by env var
-// For physical device, replace with your computer's local IP (e.g., 192.168.1.XX)
-// For Tunnel mode: Replace this with your localtunnel URL (e.g. https://xyz.loca.lt/api/)
-const BASE_URL = 'http://YOUR_LOCAL_IP:8000/api/';
+// Get the host IP dynamically from Expo Constants
+const getBaseUrl = () => {
+  if (Platform.OS === 'web') {
+    return 'http://localhost:8000/api/';
+  }
+  
+  const debuggerHost = Constants.expoConfig?.hostUri;
+  const localhost = debuggerHost?.split(':').shift();
+  // Using confirmed machine IP 10.135.143.5 as primary fallback
+  return localhost ? `http://${localhost}:8000/api/` : 'http://10.135.143.5:8000/api/';
+};
+
+const BASE_URL = getBaseUrl();
+console.log('DEBUG: API Base URL initialized as:', BASE_URL);
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased to 30s for slow model/DB responses
   headers: {
     'Content-Type': 'application/json',
     'ngrok-skip-browser-warning': 'true',

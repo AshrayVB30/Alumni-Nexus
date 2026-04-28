@@ -26,12 +26,16 @@ export const CreateProjectScreen = () => {
   
   const [formData, setFormData] = useState({
     title: '',
+    tagline: '',
     description: '',
     type: 'Job',
     skills_required: '',
     stipend: '',
     duration: '',
-    location: 'Remote'
+    effort_level: '',
+    location_type: 'Remote',
+    students_needed: 1,
+    deadline: ''
   });
 
   const handleSubmit = async () => {
@@ -82,6 +86,13 @@ export const CreateProjectScreen = () => {
               onChangeText={(t) => setFormData({...formData, title: t})}
             />
             
+            <AppInput 
+              label="Short Tagline"
+              placeholder="e.g. Design a backend system using NLP"
+              value={formData.tagline}
+              onChangeText={(t) => setFormData({...formData, tagline: t})}
+            />
+
             <View style={styles.typeContainer}>
               <Text style={styles.label}>Opportunity Type</Text>
               <View style={styles.typeButtons}>
@@ -118,8 +129,8 @@ export const CreateProjectScreen = () => {
             <View style={styles.row}>
               <View style={{ flex: 1 }}>
                 <AppInput 
-                  label="Stipend / Salary"
-                  placeholder="e.g. $500/mo or Unpaid"
+                  label="Stipend"
+                  placeholder="e.g. $500/mo"
                   value={formData.stipend}
                   onChangeText={(t) => setFormData({...formData, stipend: t})}
                 />
@@ -135,12 +146,46 @@ export const CreateProjectScreen = () => {
               </View>
             </View>
 
-            <AppInput 
-              label="Location"
-              placeholder="e.g. Remote, Mumbai, New York"
-              value={formData.location}
-              onChangeText={(t) => setFormData({...formData, location: t})}
-            />
+            <View style={styles.row}>
+              <View style={{ flex: 1 }}>
+                <AppInput 
+                  label="Effort"
+                  placeholder="e.g. Part-time"
+                  value={formData.effort_level}
+                  onChangeText={(t) => setFormData({...formData, effort_level: t})}
+                />
+              </View>
+              <View style={{ width: Spacing.md }} />
+              <View style={{ flex: 1 }}>
+                <AppInput 
+                  label="Deadline"
+                  placeholder="e.g. Dec 31"
+                  value={formData.deadline}
+                  onChangeText={(t) => setFormData({...formData, deadline: t})}
+                />
+              </View>
+            </View>
+
+            <View style={styles.row}>
+              <View style={{ flex: 1 }}>
+                <AppInput 
+                  label="Location"
+                  placeholder="e.g. Remote"
+                  value={formData.location_type}
+                  onChangeText={(t) => setFormData({...formData, location_type: t})}
+                />
+              </View>
+              <View style={{ width: Spacing.md }} />
+              <View style={{ flex: 1 }}>
+                <AppInput 
+                  label="Slots"
+                  placeholder="e.g. 2"
+                  value={String(formData.students_needed)}
+                  onChangeText={(t) => setFormData({...formData, students_needed: parseInt(t) || 1})}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
           </View>
 
           <AppButton 

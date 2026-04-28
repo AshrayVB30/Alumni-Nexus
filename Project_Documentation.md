@@ -14,6 +14,7 @@ To empower educational communities by leveraging AI to create meaningful connect
 *   **Skill Marketplace**: A platform for alumni to post projects and students to apply, fostering practical learning.
 *   **Real-time Communication**: Integrated WebSocket-based chat for instant guidance.
 *   **Knowledge Hub**: A community forum for long-form discussions and institutional updates.
+*   **Admin Governance**: A premium portal for platform analytics, user verification, and content moderation.
 *   **Cross-Platform Access**: Native-feel experience on both web (Next.js) and mobile (React Native/Expo).
 
 ---
@@ -64,10 +65,11 @@ graph TD
 ### Web Frontend
 *   **Framework**: Next.js 14 (App Router)
 *   **Language**: TypeScript (Strict typing)
-*   **Styling**: Tailwind CSS with Framer Motion for animations.
-*   **UI Components**: Shadcn UI (Radix-based) for a premium look and feel.
+*   **Styling**: Tailwind CSS with **Framer Motion** for premium animations.
+*   **Charts**: **Recharts** for real-time data visualization in the Admin Portal.
+*   **UI Components**: Custom Design System with glassy cards and soft shadows.
 *   **Icons**: Lucide React.
-*   **State Management**: React Context API & Hooks.
+*   **State Management**: Zustand & React Hooks.
 
 ### Mobile App
 *   **Framework**: React Native with **Expo**.
@@ -77,7 +79,26 @@ graph TD
 
 ---
 
-## 4. Database Schema (MongoDB)
+## 4. Admin Portal: System Governance
+
+The platform includes a **Premium Admin Dashboard** designed for institutional oversight:
+
+### Modules
+*   **Analytics Dashboard**: Real-time visualization of user growth, active engagement, and platform health.
+*   **User Management**: Unified interface for verifying alumni, managing roles, and auditing user activity.
+*   **Content Moderation**: Tools to monitor and moderate community posts and project listings.
+*   **System Logs**: Live feed of platform events and security audits.
+
+### Design Aesthetics
+The Admin Portal utilizes a **Glassmorphic SaaS Theme**:
+- 26px font-weight for primary headers.
+- 16px border-radius for cards.
+- Consistent 70/30 layout for data-rich sections.
+- Integrated `DashboardLayout` for unified navigation.
+
+---
+
+## 5. Database Schema (MongoDB)
 
 ### `users` Collection
 The core collection storing identity and rich profile data.
@@ -88,6 +109,7 @@ The core collection storing identity and rich profile data.
   "email": "user@example.com",
   "password": "hashed_password",
   "role": "Student | Alumni | Admin",
+  "is_verified": true,
   "profile": {
     "bio": "Text description",
     "skills": ["Python", "Design"],
@@ -112,21 +134,9 @@ The core collection storing identity and rich profile data.
 }
 ```
 
-### `messages` Collection
-Optimized for retrieval of conversation history.
-```json
-{
-  "sender_id": "uuid",
-  "receiver_id": "uuid",
-  "message": "Hello!",
-  "timestamp": "ISO-8601 String",
-  "is_read": false
-}
-```
-
 ---
 
-## 5. AI Matching Engine: Deep Dive
+## 6. AI Matching Engine: Deep Dive
 
 The "AI Match" feature uses a **Vector Space Model** to find the most relevant mentors for a student.
 
@@ -138,7 +148,7 @@ The "AI Match" feature uses a **Vector Space Model** to find the most relevant m
 
 ---
 
-## 6. API Reference
+## 7. API Reference
 
 ### Auth Module (`/api/auth`)
 *   `POST /register`: Onboard new users.
@@ -154,45 +164,20 @@ The "AI Match" feature uses a **Vector Space Model** to find the most relevant m
 *   `POST /`: Create a new project (Alumni only).
 *   `POST /{id}/apply`: Apply for a project (Student only).
 
+### Forum Module (`/api/posts`)
+*   `GET /`: Fetch forum feed.
+*   `POST /`: Create a new post.
+*   `POST /{id}/comment`: Add a comment to a post.
+
 ### Communication Module (`/api/chat`)
 *   `WS /ws/{token}`: Real-time messaging entry point.
 *   `GET /conversations`: List active chat threads.
 *   `GET /history/{user_id}`: Retrieve message logs.
 
----
-
-## 7. Setup & Installation
-
-### 1. Environment Configuration
-Create a `.env` file in the root:
-```env
-MONGODB_URI=your_mongodb_uri_here
-SECRET_KEY=your_super_secret_jwt_key
-ALGORITHM=HS256
-```
-
-### 2. Backend Setup
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python run.py
-```
-
-### 3. Web Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### 4. Mobile Setup
-```bash
-cd mobile
-npm install
-npx expo start
-```
+### Admin Module (`/api/admin`)
+*   `GET /analytics`: Fetch platform performance data.
+*   `GET /users`: Paginated list of users for management.
+*   `POST /users/{id}/verify`: verify or unverify a user.
 
 ---
 
@@ -203,13 +188,14 @@ npx expo start
 - [x] Phase 3: Real-time Chat & WebSockets.
 - [x] Phase 4: Skill Marketplace & Project Application.
 - [x] Phase 5: Mobile App development with Expo.
-- [ ] Phase 6: Video conferencing integration (WebRTC).
-- [ ] Phase 7: Automated Resume Reviewer (LLM Integration).
-- [ ] Phase 8: Global Notification System (Push/Email).
+- [x] Phase 6: **Premium Admin Dashboard & Analytics**.
+- [ ] Phase 7: Video conferencing integration (WebRTC).
+- [ ] Phase 8: Automated Resume Reviewer (LLM Integration).
+- [ ] Phase 9: Global Notification System (Push/Email).
 
 ---
 
 ## 9. Maintainer Notes
 *   **Vector Sync**: The FAISS index is updated on server startup. In a scaling environment, this should be moved to a background task or a dedicated vector database.
-*   **Security**: Always ensure the `SECRET_KEY` is kept confidential and changed in production environments.
+*   **Security**: Ensure `DashboardLayout` protection logic is consistently applied to all administrative routes.
 

@@ -68,7 +68,7 @@ const FEATURES = [
 
 export default function Register() {
   const router = useRouter();
-  const [form,     setForm]     = useState({ name: '', email: '', password: '', role: 'Student' });
+  const [form,     setForm]     = useState({ name: '', email: '', password: '', role: 'Student', usn: '', department: '', year_of_passing: '' });
   const [showPwd,  setShowPwd]  = useState(false);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
@@ -83,6 +83,8 @@ export default function Register() {
     else if (!/\S+@\S+\.\S+/.test(form.email)) { setEmailErr('Enter a valid email.'); ok = false; }
     else setEmailErr('');
     if (!form.password || form.password.length < 8) { setPwdErr('Password must be at least 8 characters.'); ok = false; } else setPwdErr('');
+    if (!form.usn.trim()) { setError('USN is required.'); ok = false; }
+    else if (!form.year_of_passing.trim()) { setError('Year of Passing is required.'); ok = false; }
     return ok;
   };
 
@@ -95,7 +97,15 @@ export default function Register() {
       await api.post('/auth/register', form);
       router.push('/auth/login');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+      let errorMessage = 'Registration failed. Please try again.';
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') {
+          errorMessage = err.response.data.detail;
+        } else if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail[0]?.msg || errorMessage;
+        }
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -222,6 +232,11 @@ export default function Register() {
               </div>
 
               <Field label="Full Name" type="text" placeholder="Jane Doe" value={form.name} onChange={(v) => setForm({ ...form, name: v })} autoComplete="name" icon={User} error={nameErr} autoFocus />
+              <Field label="USN" type="text" placeholder="1XY21CS001" value={form.usn} onChange={(v) => setForm({ ...form, usn: v })} icon={User} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <Field label="Department" type="text" placeholder="CS, EC, ME" value={form.department} onChange={(v) => setForm({ ...form, department: v })} icon={Briefcase} />
+                <Field label="Passing Year" type="text" placeholder="2025" value={form.year_of_passing} onChange={(v) => setForm({ ...form, year_of_passing: v })} icon={GraduationCap} />
+              </div>
               <Field label="Email Address" type="email" placeholder="jane@university.edu" value={form.email} onChange={(v) => setForm({ ...form, email: v })} autoComplete="email" icon={Mail} error={emailErr} />
               <Field
                 label="Password"
