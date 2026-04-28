@@ -25,6 +25,7 @@ import { EditProfileScreen } from '../screens/profile/EditProfileScreen';
 import { UserProfileScreen } from '../screens/profile/UserProfileScreen';
 import { ForumScreen } from '../screens/forum/ForumScreen';
 import { CreatePostScreen } from '../screens/forum/CreatePostScreen';
+import { PostDetailScreen } from '../screens/forum/PostDetailScreen';
 import { AdminDashboardScreen } from '../screens/admin/AdminDashboardScreen';
 import { NotificationsScreen } from '../screens/notifications/NotificationsScreen';
 import { MentorsScreen } from '../screens/mentors/MentorsScreen';
@@ -56,6 +57,7 @@ const ForumStackNavigator = () => (
   <ForumStack.Navigator screenOptions={{ headerShown: false }}>
     <ForumStack.Screen name="Forum" component={ForumScreen} />
     <ForumStack.Screen name="CreatePost" component={CreatePostScreen} />
+    <ForumStack.Screen name="PostDetail" component={PostDetailScreen} />
   </ForumStack.Navigator>
 );
 

@@ -250,20 +250,20 @@ function ProjectCard({ project, userId, onOpen, onApply, onViewApplicants }: {
             </button>
           ) : (
             <button
-              onClick={(e) => { e.stopPropagation(); if (!hasApplied) onApply(project._id); }}
+              onClick={(e) => { e.stopPropagation(); if (!hasApplied && !isOwner) onApply(project._id); }}
               onMouseEnter={() => setApplyHov(true)}
               onMouseLeave={() => setApplyHov(false)}
-              disabled={hasApplied}
+              disabled={hasApplied || isOwner}
               style={{
                 height: 32, padding: '0 14px', borderRadius: 8, border: 'none',
-                background: hasApplied ? '#f1f5f9' : applyHov ? '#4338ca' : C.indigo,
-                color: hasApplied ? C.subtle : '#fff',
-                fontSize: 12, fontWeight: 700, cursor: hasApplied ? 'not-allowed' : 'pointer',
+                background: (hasApplied || isOwner) ? '#f1f5f9' : applyHov ? '#4338ca' : C.indigo,
+                color: (hasApplied || isOwner) ? C.subtle : '#fff',
+                fontSize: 12, fontWeight: 700, cursor: (hasApplied || isOwner) ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center', gap: 5, transition: 'all 150ms',
-                boxShadow: !hasApplied && applyHov ? '0 2px 8px rgba(79,70,229,0.3)' : 'none',
+                boxShadow: !(hasApplied || isOwner) && applyHov ? '0 2px 8px rgba(79,70,229,0.3)' : 'none',
               }}
             >
-              {hasApplied ? <><CheckCircle style={{ width: 12, height: 12 }} /> Applied</> : 'Apply Now'}
+              {isOwner ? 'Your Project' : hasApplied ? <><CheckCircle style={{ width: 12, height: 12 }} /> Applied</> : 'Apply Now'}
             </button>
           )}
         </div>
@@ -312,6 +312,7 @@ export default function Marketplace() {
   const [searchFoc,    setSearchFoc]    = useState(false);
   const [selected,     setSelected]     = useState<MarketplaceProject | null>(null);
   const [applicantsId, setApplicantsId] = useState<string | null>(null);
+  const [submitting,   setSubmitting]   = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -327,13 +328,17 @@ export default function Marketplace() {
   useEffect(() => { fetchProjects(); }, []);
 
   const handleApply = async (id: string) => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       await api.post(`/projects/${id}/apply`);
       toast('Application submitted.', 'success');
-      fetchProjects();
+      await fetchProjects();
       setSelected(null);
     } catch (err: any) {
       toast(err.response?.data?.detail || 'Application failed.', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 

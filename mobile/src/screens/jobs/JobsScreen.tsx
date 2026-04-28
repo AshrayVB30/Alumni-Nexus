@@ -61,6 +61,8 @@ export const JobsScreen = () => {
     try {
       await projectService.applyToProject(projectId);
       Alert.alert('Success', `You have applied to "${title}" successfully!`);
+      // Refresh projects to update application status in UI
+      fetchProjects();
     } catch (err: any) {
       console.error(err);
       Alert.alert('Application Failed', err.response?.data?.detail || 'Something went wrong');
@@ -111,11 +113,25 @@ export const JobsScreen = () => {
       ) : null}
 
       <View style={styles.footer}>
-        <AppButton 
-          title="Apply Now" 
-          onPress={() => handleApply(item.id, item.title)} 
-          style={styles.applyBtn}
-        />
+        {item.posted_by === user?.id ? (
+          <AppButton 
+            title="Manage Project" 
+            onPress={() => {
+              // Alumni can manage their own projects
+              Alert.alert('Project Owner', 'You are the owner of this project.');
+            }} 
+            style={styles.applyBtn}
+            variant="outline"
+          />
+        ) : (
+          <AppButton 
+            title={item.applicants?.includes(user?.id) ? "Applied" : "Apply Now"} 
+            onPress={() => handleApply(item.id, item.title)} 
+            disabled={item.applicants?.includes(user?.id)}
+            style={styles.applyBtn}
+            variant={item.applicants?.includes(user?.id) ? "outline" : "primary"}
+          />
+        )}
         <TouchableOpacity style={styles.saveBtn}>
           <Ionicons name="bookmark-outline" size={20} color={Colors.primary} />
         </TouchableOpacity>

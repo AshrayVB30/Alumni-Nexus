@@ -25,6 +25,7 @@ export type HomeStackParamList = {
   Notifications: undefined;
   Forum: undefined;
   CreatePost: undefined;
+  PostDetail: { post: any };
 };
 
 export type DirectoryStackParamList = {

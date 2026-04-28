@@ -92,50 +92,58 @@ export const ForumScreen = () => {
     const isLiked = item.likes?.includes(user?.id || '');
     
     return (
-      <Card style={styles.postCard}>
-        <View style={styles.postHeader}>
-          <Avatar name={item.author_name} size={40} />
-          <View style={styles.authorInfo}>
-            <Text style={styles.authorName}>{item.author_name}</Text>
-            <View style={styles.metaInfo}>
-              <Text style={styles.timestamp}>{timeAgo(item.timestamp)}</Text>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>{item.category}</Text>
+      <TouchableOpacity 
+        activeOpacity={0.9} 
+        onPress={() => navigation.navigate('PostDetail', { post: item })}
+      >
+        <Card style={styles.postCard}>
+          <View style={styles.postHeader}>
+            <Avatar name={item.author_name} size={40} />
+            <View style={styles.authorInfo}>
+              <Text style={styles.authorName}>{item.author_name}</Text>
+              <View style={styles.metaInfo}>
+                <Text style={styles.timestamp}>{timeAgo(item.timestamp)}</Text>
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryText}>{item.category}</Text>
+                </View>
               </View>
             </View>
+            <TouchableOpacity>
+              <Ionicons name="ellipsis-horizontal" size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity>
-            <Ionicons name="ellipsis-horizontal" size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
 
-        <Text style={styles.postContent}>{item.content}</Text>
+          <Text style={styles.postContent}>{item.content}</Text>
 
-        <View style={styles.postActions}>
-          <TouchableOpacity 
-            style={styles.actionBtn} 
-            onPress={() => handleLike(item._id)}
-          >
-            <Ionicons 
-              name={isLiked ? "heart" : "heart-outline"} 
-              size={20} 
-              color={isLiked ? Colors.error : Colors.textSecondary} 
-            />
-            <Text style={[styles.actionText, isLiked && { color: Colors.error }]}>
-              {item.likes?.length || 0}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.postActions}>
+            <TouchableOpacity 
+              style={styles.actionBtn} 
+              onPress={() => handleLike(item._id)}
+            >
+              <Ionicons 
+                name={isLiked ? "heart" : "heart-outline"} 
+                size={20} 
+                color={isLiked ? Colors.error : Colors.textSecondary} 
+              />
+              <Text style={[styles.actionText, isLiked && { color: Colors.error }]}>
+                {item.likes?.length || 0}
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionBtn}>
-            <Ionicons name="chatbubble-outline" size={18} color={Colors.textSecondary} />
-            <Text style={styles.actionText}>{item.comments?.length || 0}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => navigation.navigate('PostDetail', { post: item })}
+            >
+              <Ionicons name="chatbubble-outline" size={18} color={Colors.textSecondary} />
+              <Text style={styles.actionText}>{item.comments?.length || 0}</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionBtn}>
-            <Ionicons name="share-social-outline" size={18} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-      </Card>
+            <TouchableOpacity style={styles.actionBtn}>
+              <Ionicons name="share-social-outline" size={18} color={Colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </Card>
+      </TouchableOpacity>
     );
   };
 

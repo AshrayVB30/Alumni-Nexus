@@ -19,12 +19,19 @@ class CommentCreate(BaseModel):
 async def create_post(post: PostCreate):
     db = get_database()
     posts_coll = db["posts"]
+    users_coll = db["users"]
+    
+    # Fetch author name
+    user = await users_coll.find_one({"_id": post.author})
+    author_name = user.get("name", "Unknown") if user else "Unknown"
+    
     post_id = str(uuid.uuid4())
     
     new_post = {
         "_id": post_id,
         "content": post.content,
         "author": post.author,
+        "author_name": author_name,
         "comments": [],
         "likes": [],
         "timestamp": datetime.utcnow()
@@ -44,10 +51,20 @@ async def list_posts():
 async def add_comment(post_id: str, comment: CommentCreate):
     db = get_database()
     posts_coll = db["posts"]
+    users_coll = db["users"]
+    
+    # Fetch author name
+    user = await users_coll.find_one({"_id": comment.author})
+    author_name = user.get("name", "Unknown") if user else "Unknown"
     
     result = await posts_coll.update_one(
         {"_id": post_id},
-        {"$push": {"comments": {"author": comment.author, "content": comment.content, "timestamp": datetime.utcnow()}}}
+        {"$push": {"comments": {
+            "author": comment.author, 
+            "author_name": author_name,
+            "content": comment.content, 
+            "timestamp": datetime.utcnow()
+        }}}
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Post not found")
